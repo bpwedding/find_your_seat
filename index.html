@@ -32,14 +32,15 @@ async function loadGuests(){
   }
 }
 const coordinates={1:[28,17],2:[72,17],3:[13,31],4:[87,31],5:[28,45],6:[72,45],7:[13,59],8:[87,59],9:[28,73],10:[72,73],11:[13,87],12:[87,87]};
-const map=document.getElementById('map');Object.entries(coordinates).forEach(([n,[x,y]])=>{const el=document.createElement('div');el.className='table';el.id='table-'+n;el.style.setProperty('--x',x+'%');el.style.setProperty('--y',y+'%');el.textContent=n;el.setAttribute('aria-label','โต๊ะ '+n);map.appendChild(el)});
+const map=document.getElementById('map');Object.entries(coordinates).forEach(([n,[x,y]])=>{const el=document.createElement('div');el.className='table';el.id='table-'+n;el.style.setProperty('--x',x+'%');el.style.setProperty('--y',y+'%');el.textContent=n<=2?'VIP '+n:n;el.setAttribute('aria-label',tableLabel(Number(n)));map.appendChild(el)});
+function tableLabel(n){return n===1?'VIP 1':n===2?'VIP 2':'โต๊ะ '+n}
 function clear(){document.querySelectorAll('.table').forEach(el=>el.classList.remove('active'))}
 function showGuest(g){
   clear();
   const result=document.getElementById('result');
   result.replaceChildren();
   const welcome=document.createElement('div');welcome.textContent='ยินดีต้อนรับ '+g.name;
-  const table=document.createElement('strong');table.textContent='โต๊ะหมายเลข '+g.table;
+  const table=document.createElement('strong');table.textContent=g.table<=2?tableLabel(g.table):'โต๊ะหมายเลข '+g.table;
   const note=document.createElement('div');note.className='sub';note.textContent='ดูโต๊ะที่ไฮไลต์บนแผนผังด้านล่าง';
   result.append(welcome,table,note);
   document.getElementById('table-'+g.table).classList.add('active');
@@ -60,7 +61,7 @@ document.getElementById('searchForm').addEventListener('submit',e=>{
   matches.forEach(g=>{
     const button=document.createElement('button');button.type='button';button.className='choice';
     const name=document.createElement('span');name.textContent=g.name;
-    const table=document.createElement('small');table.textContent='โต๊ะ '+g.table;
+    const table=document.createElement('small');table.textContent=tableLabel(g.table);
     button.append(name,table);
     button.addEventListener('click',()=>showGuest(g));
     choices.appendChild(button);
