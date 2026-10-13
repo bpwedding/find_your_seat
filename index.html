@@ -1,26 +1,53 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#751f35"><title>B & P | Find Your Seat</title><style>:root{--wine:#751f35;--cream:#faf5ec;--ink:#302a2a;--gold:#b89161}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Tahoma,Arial,sans-serif}.wrap{max-width:960px;margin:auto;padding:24px 16px 70px}header{text-align:center;padding:28px 0 20px}.monogram{font-family:Georgia,serif;font-size:54px;color:var(--wine)}h1{font-family:Georgia,serif;font-size:28px;margin:8px}p{line-height:1.7}.muted{color:#776d68}.panel{background:#fff;border:1px solid #e9dcd0;border-radius:18px;padding:22px;box-shadow:0 6px 24px #4c23220b;margin:18px 0}label{font-weight:bold;display:block;margin-bottom:10px}input{width:100%;padding:15px;border-radius:10px;border:1px solid #d8c6bb;font-size:17px}button{border:0;background:var(--wine);color:white;border-radius:10px;padding:13px 20px;font-size:16px;cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #b89161}.search{display:flex;gap:10px}.search input{flex:1;min-width:0}.result{margin-top:18px;min-height:26px}.success{padding:16px;background:#f8edf0;border:1px solid #ead0d7;border-radius:12px}.table-num{font-size:32px;color:var(--wine);font-weight:bold}.hall{position:relative;background:#f3e9de;border:2px solid #c5b4a2;border-radius:12px;padding:20px 12px 12px;max-width:650px;margin:16px auto}.stage{margin:0 auto 26px;width:60%;background:#7c3147;color:white;border-radius:8px;padding:14px;text-align:center}.tables{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:23px 10px;justify-items:center;padding:8px 4px 24px}.seat{width:min(100%,105px);aspect-ratio:1;border-radius:50%;background:white;border:3px solid #d4bba5;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:#694d43;position:relative;transition:.2s}.seat::before{content:"";position:absolute;inset:-9px;border:2px dotted #d5c8bc;border-radius:50%}.seat.active{background:var(--wine);color:#fff;border-color:#cfa66c;box-shadow:0 0 0 7px #eac8cf;transform:scale(1.08)}.entrance{text-align:center;border-top:2px dashed #c3ab9a;padding:15px 0 2px;font-weight:bold}.legend{text-align:center;font-size:13px;color:#766e6b}.footer{text-align:center;color:#8a7773;font-size:13px;margin-top:26px}.hidden{display:none}@media(max-width:480px){.search{flex-direction:column}.seat{width:74px}.tables{gap:23px 5px}.panel{padding:16px}.monogram{font-size:45px}}</style></head><body><main class="wrap"><header><div class="monogram">B <span style="font-size:30px">&</span> P</div><h1>Find Your Seat</h1><p class="muted">ยินดีต้อนรับสู่งานมงคลสมรส<br>ค้นหาตำแหน่งโต๊ะของคุณได้ที่นี่</p></header><section class="panel"><label for="guest">กรอกชื่อหรือนามสกุลของคุณ</label><div class="search"><input id="guest" placeholder="เช่น สมชาย หรือ Somchai" autocomplete="name"><button id="find">ค้นหาที่นั่ง</button></div><div id="result" class="result" aria-live="polite"><span class="muted">พิมพ์ชื่อแล้วกดค้นหาเพื่อดูหมายเลขโต๊ะ</span></div></section><section class="panel"><h2 style="text-align:center;color:var(--wine)">แผนผังโต๊ะจีน · Hall 1</h2><p class="muted" style="text-align:center">15 โต๊ะ · โต๊ะละ 10 ท่าน</p><div class="hall"><div class="stage">เวที / STAGE</div><div class="tables" id="tables"></div><div class="entrance">↑ ทางเข้า / ENTRANCE</div></div><div class="legend">โต๊ะที่พบจะเปลี่ยนเป็นสี Burgundy · แผนผังตัวอย่าง ปรับตำแหน่งได้</div></section><div class="footer">With love, B & P ♡</div></main><script id="embedded-guests" type="text/plain">name,table
-สมชาย ใจดี,1
-สมหญิง ใจดี,1
-วิชัย ตัวอย่าง,2
-สุดา ตัวอย่าง,3
-Somchai Example,4
-Ben Example,5
-</script><script>
-// ปรับรายชื่อจริงที่ไฟล์ guests.csv: name,table (1-15)
-const guestsUrl='guests.csv';let guests=[];const tableArea=document.getElementById('tables');const result=document.getElementById('result');const input=document.getElementById('guest');
-// จัดเรียงแถวละ 3 โต๊ะ; เวทีอยู่ด้านบน
-for(let n=1;n<=15;n++){const el=document.createElement('div');el.className='seat';el.id='table-'+n;el.textContent='โต๊ะ '+n;tableArea.appendChild(el)}
-function csvParse(s){const lines=s.replace(/^\uFEFF/,'').split(/\r?\n/).filter(x=>x.trim());return lines.slice(1).map(line=>{let fields=[],v='',quote=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(quote&&line[i+1]==='"'){v+='"';i++}else quote=!quote}else if(c===','&&!quote){fields.push(v.trim());v=''}else v+=c}fields.push(v.trim());return {name:fields[0]||'',table:Number(fields[1])}}).filter(g=>g.name&&g.table>=1&&g.table<=15)}
-// รายชื่อสำรองใน HTML ทำให้เปิดไฟล์จากเครื่องแล้วค้นหาได้ทันที
-const embeddedCsv = document.getElementById('embedded-guests').textContent;
-guests=csvParse(embeddedCsv);
-// เมื่อใช้งานผ่าน GitHub Pages ให้ใช้ข้อมูลล่าสุดจาก guests.csv
-if(location.protocol==='http:'||location.protocol==='https:'){
- fetch(guestsUrl,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('csv');return r.text()}).then(s=>{const updated=csvParse(s);if(updated.length)guests=updated}).catch(()=>{});
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>B & P | Find Your Table</title><style>
+:root{--wine:#792b42;--cream:#faf4eb;--gold:#c5a47d}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:#34272b;font-family:system-ui,'Tahoma',sans-serif}.wrap{max-width:960px;margin:auto;padding:24px 14px 60px}header{text-align:center;padding:22px 0}header .monogram{font-family:Georgia,serif;color:var(--wine);font-size:38px}h1{font-family:Georgia,serif;color:var(--wine);margin:8px 0;font-weight:500}p{line-height:1.6}.panel{background:white;border:1px solid #e9ddd0;border-radius:18px;padding:20px;box-shadow:0 5px 24px #552b3210;margin-bottom:18px}.search{display:flex;gap:10px}input{font:inherit;padding:13px 15px;border:1px solid #d7c8bd;border-radius:9px;flex:1;min-width:0}button{font:inherit;background:var(--wine);color:white;border:0;padding:12px 20px;border-radius:9px;cursor:pointer}button:hover{filter:brightness(1.12)}#result{text-align:center;min-height:32px;margin-top:14px}#result strong{color:var(--wine);font-size:24px}.sub{color:#7d6b6e;font-size:14px}.map{position:relative;width:100%;aspect-ratio:760/740;max-width:650px;margin:auto;background:#fffaf3;border:2px solid #d9c5b2;border-radius:12px;overflow:hidden}.stage{position:absolute;left:11%;top:2%;width:78%;height:7%;background:#ead8c9;border:2px solid var(--gold);border-radius:6px;display:grid;place-items:center;color:var(--wine);font-weight:700}.aisle{position:absolute;left:42%;width:16%;top:9%;bottom:5%;background:#f0e4d6;border-left:2px dashed #c9b6a0;border-right:2px dashed #c9b6a0;display:grid;place-items:center}.aisle span{writing-mode:vertical-rl;color:#92775d;letter-spacing:2px}.door{position:absolute;bottom:1%;left:42%;width:16%;height:4%;border:2px solid #be8858;border-radius:4px;text-align:center;background:#fff5e8;color:#875332;font-size:clamp(9px,1.9vw,14px);display:grid;place-items:center}.table{position:absolute;left:var(--x);top:var(--y);width:14.5%;aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid var(--wine);border-radius:50%;background:#fff;display:grid;place-items:center;font-size:clamp(12px,2.5vw,19px);color:var(--wine);font-weight:700;transition:.2s;z-index:2}.table.active{background:var(--wine);color:white;border-color:#d7b77f;box-shadow:0 0 0 6px #d7b77f70;transform:translate(-50%,-50%) scale(1.12)}.map-title{text-align:center;color:var(--wine);margin:4px 0 15px}details{margin-top:18px}summary{cursor:pointer;color:var(--wine)}textarea{width:100%;min-height:140px;border:1px solid #d7c8bd;border-radius:9px;padding:12px;font:14px monospace}code{background:#f8f0e8;padding:2px 5px;border-radius:4px}@media(max-width:520px){.wrap{padding:10px 10px 40px}.panel{padding:14px}.search{flex-direction:column}.table{border-width:2px}.map{aspect-ratio:760/820}.stage{font-size:13px}}</style></head><body><main class="wrap"><header><div class="monogram">B & P</div><h1>Find Your Table</h1><p>ยินดีต้อนรับสู่งานมงคลสมรส<br>ค้นหาชื่อของคุณเพื่อดูหมายเลขโต๊ะ</p></header><section class="panel"><form class="search" id="searchForm"><input id="guestName" placeholder="พิมพ์ชื่อ หรือชื่อ-นามสกุล" autocomplete="name" required><button type="submit">ค้นหาโต๊ะ</button></form><div id="result" role="status" aria-live="polite" class="sub">กำลังโหลดรายชื่อแขกจาก guests.csv…</div></section><section class="panel"><h2 class="map-title">แผนผังโต๊ะจีน • 12 โต๊ะ</h2><div class="map" id="map"><div class="stage">เวที / STAGE</div><div class="aisle"><span>ทางเดินกลาง</span></div><div class="door">ประตูทางเข้า</div></div><p class="sub" style="text-align:center">โต๊ะฝั่งซ้ายเลขคี่ • ฝั่งขวาเลขคู่ • จัดวางสลับเยื้องตามผังที่กำหนด</p></section></main><script>
+// โหลดรายชื่อจาก guests.csv ที่อยู่โฟลเดอร์เดียวกับ index.html
+let guests=[];
+let loaded=false;
+const status=document.getElementById('result');
+function normalize(s){return s.toLocaleLowerCase().replace(/[\s.\-]/g,'').trim()}
+function parseCSV(text){
+  const rows=[];let row=[],field='',quoted=false;
+  text=text.replace(/^\uFEFF/,'');
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c==='"'){if(quoted && text[i+1]==='"'){field+='"';i++}else quoted=!quoted}
+    else if(c===',' && !quoted){row.push(field);field=''}
+    else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(field);rows.push(row);row=[];field=''}
+    else field+=c;
+  }
+  if(field||row.length){row.push(field);rows.push(row)}
+  if(rows.length && /^(name|ชื่อ|ชื่อแขก)$/i.test(rows[0][0].trim()))rows.shift();
+  return rows.map(r=>({name:(r[0]||'').trim(),table:Number((r[1]||'').trim())}))
+    .filter(g=>g.name && Number.isInteger(g.table) && g.table>=1 && g.table<=12);
 }
-
-function norm(s){return s.toLocaleLowerCase().replace(/\s+/g,'').trim()}
-function find(){document.querySelectorAll('.seat').forEach(e=>e.classList.remove('active'));const q=norm(input.value);if(!guests.length){result.textContent='ยังไม่มีรายชื่อแขกในระบบ';return}if(q.length<2){result.textContent='กรุณากรอกชื่ออย่างน้อย 2 ตัวอักษร';return}const exact=guests.filter(g=>norm(g.name)===q);const found=exact.length?exact:guests.filter(g=>norm(g.name).includes(q));result.replaceChildren();if(!found.length){result.textContent='ไม่พบรายชื่อ กรุณาตรวจสอบการสะกด หรือติดต่อโต๊ะลงทะเบียน';return}if(found.length>1){const msg=document.createElement('p');msg.textContent='พบหลายรายชื่อ กรุณาเลือกชื่อของคุณ:';result.appendChild(msg);found.slice(0,30).forEach(g=>{const b=document.createElement('button');b.textContent=g.name+' · โต๊ะ '+g.table;b.style.margin='4px';b.onclick=()=>show(g);result.appendChild(b)});return}show(found[0])}
-function show(g){result.replaceChildren();const div=document.createElement('div');div.className='success';const a=document.createElement('div');a.textContent='ยินดีต้อนรับคุณ '+g.name;const b=document.createElement('div');b.className='table-num';b.textContent='โต๊ะหมายเลข '+g.table;const c=document.createElement('div');c.textContent='ดูโต๊ะที่ไฮไลต์บนแผนผังด้านล่าง';div.append(a,b,c);result.appendChild(div);document.querySelectorAll('.seat').forEach(e=>e.classList.remove('active'));const t=document.getElementById('table-'+g.table);t.classList.add('active');setTimeout(()=>t.scrollIntoView({behavior:'smooth',block:'center'}),100)}
-document.getElementById('find').onclick=find;input.addEventListener('keydown',e=>{if(e.key==='Enter')find()});
+async function loadGuests(){
+  try{
+    const response=await fetch('./guests.csv?v='+Date.now(),{cache:'no-store'});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    guests=parseCSV(await response.text());loaded=true;
+    status.textContent=guests.length?'พร้อมค้นหา • โหลดรายชื่อ '+guests.length+' รายการแล้ว':'ไม่พบรายชื่อที่ถูกต้องใน guests.csv';
+  }catch(error){
+    status.textContent='โหลด guests.csv ไม่สำเร็จ กรุณาเปิดผ่าน GitHub Pages หรือเว็บเซิร์ฟเวอร์ และตรวจสอบว่าอัปโหลดไฟล์ guests.csv แล้ว';
+    console.error('CSV loading error:',error);
+  }
+}
+const coordinates={1:[28,17],2:[72,17],3:[13,31],4:[87,31],5:[28,45],6:[72,45],7:[13,59],8:[87,59],9:[28,73],10:[72,73],11:[13,87],12:[87,87]};
+const map=document.getElementById('map');Object.entries(coordinates).forEach(([n,[x,y]])=>{const el=document.createElement('div');el.className='table';el.id='table-'+n;el.style.setProperty('--x',x+'%');el.style.setProperty('--y',y+'%');el.textContent=n;el.setAttribute('aria-label','โต๊ะ '+n);map.appendChild(el)});
+function clear(){document.querySelectorAll('.table').forEach(el=>el.classList.remove('active'))}
+document.getElementById('searchForm').addEventListener('submit',e=>{
+  e.preventDefault();clear();
+  const result=document.getElementById('result');
+  if(!loaded){result.textContent='ยังโหลดรายชื่อไม่สำเร็จ กรุณาตรวจสอบ guests.csv';return}
+  const query=normalize(document.getElementById('guestName').value);
+  if(!query){result.textContent='กรุณากรอกชื่อ';return}
+  const exact=guests.filter(g=>normalize(g.name)===query);
+  const matches=exact.length?exact:guests.filter(g=>normalize(g.name).includes(query));
+  if(!matches.length){result.textContent='ไม่พบชื่อในรายชื่อ กรุณาติดต่อเจ้าหน้าที่ต้อนรับ';return}
+  if(matches.length>1){result.textContent='พบหลายชื่อ: '+matches.slice(0,6).map(g=>g.name+' (โต๊ะ '+g.table+')').join(' • ')+' — กรุณาพิมพ์ชื่อ-นามสกุลให้ครบ';return}
+  const g=matches[0];document.getElementById('table-'+g.table).classList.add('active');
+  result.innerHTML='ยินดีต้อนรับ <b></b><br><strong>โต๊ะหมายเลข '+g.table+'</strong><br><span class="sub">ดูโต๊ะที่ไฮไลต์บนแผนผังด้านล่าง</span>';
+  result.querySelector('b').textContent=g.name;
+  document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
+});
+loadGuests();
 </script></body></html>
