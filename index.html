@@ -31,7 +31,7 @@ async function loadGuests(){
     console.error('CSV loading error:',error);
   }
 }
-const coordinates={1:[28,17],2:[72,17],3:[13,31],4:[87,31],5:[28,45],6:[72,45],7:[13,59],8:[87,59],9:[28,73],10:[72,73],11:[13,87],12:[87,87]};
+const coordinates={1:[28,23],2:[72,23],3:[13,35],4:[87,35],5:[28,47],6:[72,47],7:[13,59],8:[87,59],9:[28,71],10:[72,71],11:[13,85],12:[87,85]};
 const map=document.getElementById('map');Object.entries(coordinates).forEach(([n,[x,y]])=>{const el=document.createElement('div');el.className='table';el.id='table-'+n;el.style.setProperty('--x',x+'%');el.style.setProperty('--y',y+'%');el.textContent=n<=2?'VIP '+n:n;el.setAttribute('aria-label',tableLabel(Number(n)));map.appendChild(el)});
 function tableLabel(n){return n===1?'VIP 1':n===2?'VIP 2':'โต๊ะ '+n}
 function clear(){document.querySelectorAll('.table').forEach(el=>el.classList.remove('active'))}
